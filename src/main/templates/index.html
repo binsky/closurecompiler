@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Vert.x RESTful</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!--<script src="/Users/broleg/Desktop/jquery-1.11.1.min.js"></script>-->
+    <script>
+        $(document).ready(function(){
+            $("#get").click(function(e){
+                var js_key = $("#js_key").val();
+                $.ajax({
+                    url : "api/closure",
+                    port : "8888",
+                    type : "GET",
+                    dataType: "text",
+                    data : {
+                        key : js_key
+                    },
+                    success : function(data) {
+                        $("#output").val(data);
+                    },
+                    error : function(xhr,errmsg,err) {
+                        alert(xhr.status + ": " + xhr.responseText);
+                    }
+                });
+                e.preventDefault();
+            });
+
+            $("#post").click(function(e){
+                var data = $("#input").val();
+                var key = $("#js_key").val();
+                $.ajax({
+                    url : "api/closure",
+                    port : "8888",
+                    type : "POST",
+                    dataType: "text",
+                    data : {
+                        key : key,
+                        input : data
+                    },
+                    success : function(data) {
+                        $("#output").val(data);
+                    },
+                    error : function(xhr,errmsg,err) {
+                        alert(xhr.status + ": " + xhr.responseText);
+                    }
+                });
+                e.preventDefault();
+            });
+
+            $("#put").click(function(e){
+                var data = $("#input").val();
+                var key = $("#js_key").val();
+                $.ajax({
+                    url : "api/closure",
+                    port : "8888",
+                    type : "PUT",
+                    dataType: "text",
+                    data : {
+                        key : key,
+                        input : data
+                    },
+                    success : function(data) {
+                        $("#output").val(data);
+                    },
+                    error : function(xhr,errmsg,err) {
+                        alert(xhr.status + ": " + xhr.responseText);
+                    }
+                });
+                e.preventDefault();
+            });
+
+            $("#delete").click(function(e){
+                var key = $("js_key").val();
+                $.ajax({
+                    url : "api/closure",
+                    port : "8888",
+                    type : "DELETE",
+                    dataType: "text",
+                    data : {
+                        key : key
+                    },
+                    success : function(data) {
+                        $("#output").val(data);
+                    },
+                    error : function(xhr,errmsg,err) {
+                        alert(xhr.status + ": " + xhr.responseText);
+                    }
+                });
+                e.preventDefault();
+            });
+        });
+    </script>
+</head>
+<body>
+<form>
+    <div class="input-form">
+        <fieldset>
+            <input type="text" id="js_key" autofocus="" placeholder="JS name">
+            <p><textarea rows="40" cols="70" id="input" placeholder="Input JS"></textarea>
+            <textarea rows="40" cols="70" id="output" readonly placeholder="Output JS"></textarea></p>
+            <button id="get">GET</button>
+            <button id="post">POST</button>
+            <button id="put">PUT</button>
+            <button id="delete">DELETE</button>
+        </fieldset>
+    </div>
+
+</form>
+</body>
+</html>
