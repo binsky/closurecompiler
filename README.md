@@ -1,12 +1,13 @@
 <<<<<<< HEAD
 # Vert.x Example Maven Project
 
-Example project for creating a Vert.x module with a Gradle build.
-
-By default this module contains a simple Java verticle which listens on the event bus and responds to `ping!`
-messages with `pong!`.
-
-This example also shows you how to write tests in Java, Groovy, Ruby and Python
+TODO List:
+1) http DELETE method implementation
+2) file persistance
+3) JS code transfer using json/xml(?)
+4) Closure Compiler functionality implementation
+5) Bug fixes
+6) General refactoring and project clean-up
 
 =======
 ClosureCompiler
