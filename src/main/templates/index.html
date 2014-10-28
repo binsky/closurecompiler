@@ -72,15 +72,11 @@
             });
 
             $("#delete").click(function(e){
-                var key = $("js_key").val();
+                var key = "api/closure/" + String($("#js_key").val());
                 $.ajax({
-                    url : "api/closure",
+                    url : key,
                     port : "8888",
                     type : "DELETE",
-                    dataType: "text",
-                    data : {
-                        key : key
-                    },
                     success : function(data) {
                         $("#output").val(data);
                     },
