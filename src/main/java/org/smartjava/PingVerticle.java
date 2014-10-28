@@ -1,5 +1,6 @@
 package org.smartjava;
 
+import com.google.javascript.jscomp.SourceFile;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpServerRequest;
@@ -14,6 +15,8 @@ public class PingVerticle extends Verticle {
     private static Map<String, String> db = new HashMap<>();
     private static final String UTF8 = "UTF-8";
     private static Set<String> files = new HashSet<>();
+    private static final String ERR_NAME_CONFLICT = "Name conflict";
+    private static final String ERR_INP_REQUIERED = "File name and input code are required.";
 
   public void start() {
 
@@ -23,7 +26,6 @@ public class PingVerticle extends Verticle {
           @Override
           public void handle(final HttpServerRequest httpServerRequest) {
               httpServerRequest.response().sendFile("/Users/broleg/git/playground/vertx-demo-1/src/main/templates/index.html");
-//              httpServerRequest.response().end(new File(".").getAbsolutePath());
           }
       });
 
@@ -33,7 +35,7 @@ public class PingVerticle extends Verticle {
               String key = httpServerRequest.params().get("key");
               if (files.contains(key)) {
                   try {
-                      httpServerRequest.response().setStatusCode(200).end(ClosureCompiler.readFile(key, UTF8));
+                      httpServerRequest.response().setStatusCode(200).end(FileManager.getJSCode(key, UTF8));
                   } catch (IOException e) {
                       httpServerRequest.response().end();
                   }
@@ -53,19 +55,22 @@ public class PingVerticle extends Verticle {
                       Map<String, String> params = getParams(buffer);
                       try {
                           if (params.containsKey("key") && params.containsKey("input")) {
-                              String key = URLDecoder.decode(params.get("key"), UTF8);
-                              if (files.add(key)) {
-                                  String outputJS =
-                                          ClosureCompiler.compile(key, URLDecoder.decode(params.get("input"), UTF8));
+                              String fileName = URLDecoder.decode(params.get("key"), UTF8);
+                              if (files.add(fileName)) {
+
+                                  List<SourceFile> sourceFiles =
+                                          FileManager.createSourceFile(fileName, URLDecoder.decode(params.get("input"), UTF8));
+                                  String outputJS = ClosureCompiler.compile(sourceFiles);
+                                  FileManager.createClosuredFile(fileName, outputJS);
                                   httpServerRequest.response().setStatusCode(200).end(outputJS);
                               } else {
                                   httpServerRequest.response().setStatusCode(409).
-                                          setStatusMessage("Name conflict.").end();
+                                          setStatusMessage(ERR_NAME_CONFLICT).end();
                               }
                           }
                           else {
                               httpServerRequest.response().
-                                      setStatusCode(409).end("File name and input code are required.");
+                                      setStatusCode(409).setStatusMessage(ERR_INP_REQUIERED).end();
                           }
                       }catch(IOException e){
                           e.printStackTrace();
@@ -84,15 +89,18 @@ public class PingVerticle extends Verticle {
                       Map<String, String> params = getParams(buffer);
                       try {
                           if (params.containsKey("key") && params.containsKey("input")) {
-                              String key = URLDecoder.decode(params.get("key"), UTF8);
-                              files.add(key);
+                              String fileName = URLDecoder.decode(params.get("key"), UTF8);
+                              files.add(fileName);
+                              List<SourceFile> sourceFiles =
+                                      FileManager.createSourceFile(fileName, URLDecoder.decode(params.get("input"), UTF8));
                               String outputJS =
-                                      ClosureCompiler.compile(key, URLDecoder.decode(params.get("input"), UTF8));
+                                      ClosureCompiler.compile(sourceFiles);
+                              FileManager.createClosuredFile(fileName, outputJS);
                               httpServerRequest.response().setStatusCode(200).end(outputJS);
                           }
                           else {
                               httpServerRequest.response().
-                                      setStatusCode(409).end("File name and input code are required.");
+                                      setStatusCode(409).setStatusMessage(ERR_INP_REQUIERED).end();
                           }
                       }catch(IOException e){
                           e.printStackTrace();
@@ -105,7 +113,9 @@ public class PingVerticle extends Verticle {
       rm.delete("/api/closure/:filename", new Handler<HttpServerRequest>() {
           @Override
           public void handle(final HttpServerRequest httpServerRequest) {
-              if (files.remove(httpServerRequest.params().get("filename"))) {
+              String fileName = httpServerRequest.params().get("filename");
+              if (files.remove(fileName)) {
+                  FileManager.deleteFiles(fileName);
                   httpServerRequest.response().setStatusCode(200).end();
               }
               else {
