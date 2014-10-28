@@ -2,6 +2,7 @@
 # Vert.x Example Maven Project
 
 TODO List:
+0) FIX CONCURRENCY(?) BUG (EventBus ?) - the first POST method or a number of requests at the time don't work properly
 1) fix project dependencies
 2) fix file paths
 3) fix classpath (?)

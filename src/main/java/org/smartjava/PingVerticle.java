@@ -100,7 +100,7 @@ public class PingVerticle extends Verticle {
                           }
                           else {
                               httpServerRequest.response().
-                                      setStatusCode(409).setStatusMessage(ERR_INP_REQUIERED).end();
+                                      setStatusCode(409).setStatusMessage(ERR_INP_REQUIERED);
                           }
                       }catch(IOException e){
                           e.printStackTrace();

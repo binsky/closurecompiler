@@ -1,6 +1,7 @@
 package org.smartjava;
 
 import com.google.javascript.jscomp.SourceFile;
+import org.vertx.java.platform.Verticle;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -10,7 +11,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileManager {
+public class FileManager extends Verticle {
     private static final String ORIGINAL_PATH = "src/main/js/original/";
     private static final String CLOSURED_PATH = "src/main/js/closured/min-";
 

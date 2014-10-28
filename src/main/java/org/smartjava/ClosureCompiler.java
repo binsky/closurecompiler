@@ -2,13 +2,14 @@ package org.smartjava;
 
 import com.google.javascript.jscomp.*;
 import com.google.javascript.jscomp.Compiler;
+import org.vertx.java.platform.Verticle;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-public class ClosureCompiler {
+public class ClosureCompiler extends Verticle {
     private static List<SourceFile> EXTERNS_LIST = new ArrayList<SourceFile>();
     private static final CompilerOptions OPTIONS = new CompilerOptions();
 
