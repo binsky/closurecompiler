@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# Vert.x Example Maven Project
-
 TODO List:
 0) FIX CONCURRENCY(?) BUG (EventBus ?) - the first POST request or a number of requests at the time don't work properly
 ====
