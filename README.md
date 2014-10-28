@@ -2,13 +2,10 @@
 # Vert.x Example Maven Project
 
 TODO List:
-1) http DELETE method implementation
-2) file persistance
-3) JS code transfer using json/xml(?)
-4) Closure Compiler functionality implementation
-5) Bug fixes
-6) General refactoring and project clean-up
-
+1) fix project dependencies
+2) fix file paths
+3) fix classpath (?)
+4) make documentation
 =======
 ClosureCompiler
 ===============
