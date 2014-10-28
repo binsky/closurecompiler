@@ -23,39 +23,14 @@ import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.http.RouteMatcher;
 import org.vertx.java.platform.Verticle;
 
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLDecoder;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-/*
-This is a simple Java verticle which receives `ping` messages on the event bus and sends back `pong` replies
- */
 public class PingVerticle extends Verticle {
-    private static HashMap<String, String> db = new HashMap<String, String>();
-    static {
-        //FOR TESTS ONLY
-        db.put("example.js", "$(document).ready(function(){\n" +
-                "            $(\"#get\").click(function(e){\n" +
-                "                var js_key = $(\"js_key\").val();\n" +
-                "                $.ajax({\n" +
-                "                    url : \"api/closure\",\n" +
-                "                    port : \"8888\",\n" +
-                "                    type : \"GET\",\n" +
-                "                    dataType: \"text\",\n" +
-                "                    data : {\n" +
-                "                        key : js_key,\n" +
-                "                    },\n" +
-                "                    success : function(data) {\n" +
-                "                        $(\"#output\").val(data);\n" +
-                "                    },\n" +
-                "                    error : function(xhr,errmsg,err) {\n" +
-                "                        alert(xhr.status + \": \" + xhr.responseText);\n" +
-                "                    }\n" +
-                "                });\n" +
-                "                e.preventDefault();\n" +
-                "            });");
-    }
+    private static Map<String, String> db = new HashMap<>();
+    private static final String UTF8 = "UTF-8";
+    private static Set<String> files = new HashSet<>();
 
   public void start() {
 
@@ -65,7 +40,6 @@ public class PingVerticle extends Verticle {
           @Override
           public void handle(final HttpServerRequest httpServerRequest) {
               httpServerRequest.response().sendFile("/Users/broleg/git/playground/vertx-demo-1/src/main/templates/index.html");
-//              /Users/broleg/git/playground/vertx-demo-1/src/main/java/org/smartjava/PingVerticle.java
           }
       });
 
@@ -89,25 +63,24 @@ public class PingVerticle extends Verticle {
                   @Override
                   public void handle(Buffer buffer) {
                       Map<String, String> params = getParams(buffer);
-//                      com.google.javascript.jscomp.Compiler compiler = new com.google.javascript.jscomp.Compiler();
-//                      CompilerOptions options = new CompilerOptions();
-//                      CompilationLevel.SIMPLE_OPTIMIZATIONS.setOptionsForCompilationLevel(options);
-                      if (params.containsKey("key")) {
-                          String key = params.get("key");
-                          if (!db.containsKey(key) && params.containsKey("input")) {
-                              String js_code = null;
-                              try {
-                                  js_code = URLDecoder.decode(params.get("input"), "UTF-8");
-                              } catch (UnsupportedEncodingException e) {
-                                  e.printStackTrace();
+                      try {
+                          if (params.containsKey("key") && params.containsKey("input")) {
+                              String key = URLDecoder.decode(params.get("key"), UTF8);
+                              if (files.add(key)) {
+                                  String outputJS =
+                                          ClosureCompiler.compile(key, URLDecoder.decode(params.get("input"), UTF8));
+                                  httpServerRequest.response().setStatusCode(200).end(outputJS);
+                              } else {
+                                  httpServerRequest.response().setStatusCode(409).
+                                          setStatusMessage("Name conflict.").end();
                               }
-                              //closure compiler here
-                              db.put(key, js_code);
-                              httpServerRequest.response().setStatusCode(200).end(js_code);
                           }
                           else {
-                              httpServerRequest.response().setStatusCode(409).setStatusMessage("There is a name conflict").end();
+                              httpServerRequest.response().
+                                      setStatusCode(409).end("File name and input code are required.");
                           }
+                      }catch(IOException e){
+                          e.printStackTrace();
                       }
                   }
               });
@@ -162,7 +135,7 @@ public class PingVerticle extends Verticle {
   }
 
     private Map<String,String> getParams(Buffer buffer) {
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
         String [] paramSplits = buffer.toString().split("&");
         String [] valueSplits;
         if (paramSplits.length>0) {
